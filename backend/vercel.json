@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/django.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/django.py"
+    }
+  ],
+  "env": {
+    "PYTHONUNBUFFERED": "1",
+    "ENV_MODE": "prod"
+  }
+}

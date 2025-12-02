@@ -18,7 +18,7 @@ from config import SITE_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-rh+^nck42g_ow(jbvdk=ehr97uurrh@zmsj&grq+@#u=ad2ir_"
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-rh+^nck42g_ow(jbvdk=ehr97uurrh@zmsj&grq+@#u=ad2ir_")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("ENV_MODE", "dev").lower() == "dev"
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -81,12 +82,17 @@ TEMPLATES = [
 WSGI_APPLICATION = "wealthwise.wsgi.application"
 
 # Database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+import dj_database_url
+
+if os.getenv("DATABASE_URL"):
+    DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"), conn_max_age=600)}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -106,7 +112,9 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
